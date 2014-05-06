@@ -54,7 +54,7 @@ class CalabashTestPlugin implements Plugin<Project> {
             project.logger.debug "${project.getPath()}"
             project.logger.debug "==========================="
 
-            def fileName = (format!=null && format.equalsIgnoreCase("json")) ? "report.json" : "report.html";
+            def fileName = (format.equalsIgnoreCase("json")) ? "report.json" : "report.html";
             def outFile = new File(project.file("build/reports/calabash/${variationName}"), fileName)
             def outFileDir = outFile.parentFile
 
@@ -68,7 +68,7 @@ class CalabashTestPlugin implements Plugin<Project> {
             def apkFile = "$apkFilePath/$apkName"
             testRunTask.workingDir "${project.rootDir}/"
             def os = System.getProperty("os.name").toLowerCase()
-            def reportsFormat = (format!=null && format.equalsIgnoreCase("json")) ? "json" : "html";
+            def reportsFormat = (format.equalsIgnoreCase("json")) ? "json" : "html";
             if (os.contains("windows")) {
                 // you start commands in Windows by kicking off a cmd shell
                 testRunTask.commandLine "cmd", "/c", "calabash-android", "run", "${apkFile}", "--format", reportsFormat, "--out", outFile.canonicalPath, "-v"
