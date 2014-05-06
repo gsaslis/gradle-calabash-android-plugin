@@ -27,6 +27,8 @@ class CalabashTestPlugin implements Plugin<Project> {
                 project.android.libraryVariants
 
         def apkFilePath = "$project.buildDir/apk"
+        def format = System.getProperty("org.gradle.project.reports-format")
+        project.logger.info("Using " + format + " reports format.")
 
         variants.all { variant ->
             def buildTypeName = variant.buildType.name.capitalize()
@@ -52,7 +54,8 @@ class CalabashTestPlugin implements Plugin<Project> {
             project.logger.debug "${project.getPath()}"
             project.logger.debug "==========================="
 
-            def outFile = new File(project.file("build/reports/calabash/${variationName}"), "report.html")
+            def fileName = (format.equalsIgnoreCase("json")) ? "report.json" : "report.html";
+            def outFile = new File(project.file("build/reports/calabash/${variationName}"), fileName)
             def outFileDir = outFile.parentFile
 
 
@@ -65,12 +68,13 @@ class CalabashTestPlugin implements Plugin<Project> {
             def apkFile = "$apkFilePath/$apkName"
             testRunTask.workingDir "${project.rootDir}/"
             def os = System.getProperty("os.name").toLowerCase()
+            def reportsFormat = (format.equalsIgnoreCase("json")) ? "json" : "html";
             if (os.contains("windows")) {
                 // you start commands in Windows by kicking off a cmd shell
-                testRunTask.commandLine "cmd", "/c", "calabash-android", "run", "${apkFile}", "--format", "html", "--out", outFile.canonicalPath, "-v"
+                testRunTask.commandLine "cmd", "/c", "calabash-android", "run", "${apkFile}", "--format", reportsFormat, "--out", outFile.canonicalPath, "-v"
             }  else { // assume Linux 
                 testRunTask.environment("SCREENSHOT_PATH", "${outFileDir}/")
-                testRunTask.commandLine "calabash-android", "run", "${apkFile}", "--format", "html", "--out", outFile.canonicalPath, "-v"
+                testRunTask.commandLine "calabash-android", "run", "${apkFile}", "--format", reportsFormat, "--out", outFile.canonicalPath, "-v"
             }
 
             testRunTask.doFirst {
@@ -83,7 +87,7 @@ class CalabashTestPlugin implements Plugin<Project> {
             }
             
             testRunTask.doLast {
-                println "\r\nCalabash HTML Report: file://$outFile.canonicalPath"
+                println "\r\nCalabash Report: file://$outFile.canonicalPath"
             }
         }
     }
